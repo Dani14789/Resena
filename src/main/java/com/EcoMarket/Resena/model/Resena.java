@@ -21,7 +21,7 @@ public class Resena {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    private Long id; // Cambiado a Long
+    private Long id; 
 
     @Column(nullable = false)
     private String idProducto;

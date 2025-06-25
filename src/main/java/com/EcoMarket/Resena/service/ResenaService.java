@@ -44,4 +44,8 @@ public class ResenaService {
     public List<Resena> obtenerTodasLasResenas() {
         return resenaRepository.findAll();
     }
+
+    public Resena guardarResena(Resena resena) {
+        return resenaRepository.save(resena);
+    }
 }
