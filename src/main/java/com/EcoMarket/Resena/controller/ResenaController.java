@@ -23,7 +23,7 @@ public class ResenaController {
             Resena nuevaResena = resenaService.agregarResena(requestDTO);
             return new ResponseEntity<>(nuevaResena, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 

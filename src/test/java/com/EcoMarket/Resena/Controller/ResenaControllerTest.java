@@ -13,7 +13,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,11 +22,11 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ResenaController.class) 
+@WebMvcTest(ResenaController.class)
 class ResenaControllerTest {
 
     @Autowired
-    private MockMvc mockMvc; 
+    private MockMvc mockMvc;
 
     @MockBean
     private ResenaService resenaService;
@@ -33,17 +34,25 @@ class ResenaControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Resena resena;
+    private Resena resena1;
+    private Resena resena2;
     private CrearSolicitudResenaDTO solicitudDTO;
 
     @BeforeEach
     void setUp() {
-        resena = new Resena();
-        resena.setId(1L);
-        resena.setIdProducto("1");
-        resena.setIdUsuario("100");
-        resena.setCalificacion(5);
-        resena.setComentario("¡Muy bueno!");
+        resena1 = new Resena();
+        resena1.setId(1L);
+        resena1.setIdProducto("1");
+        resena1.setIdUsuario("100");
+        resena1.setCalificacion(5);
+        resena1.setComentario("¡Muy bueno!");
+
+        resena2 = new Resena();
+        resena2.setId(2L);
+        resena2.setIdProducto("2");
+        resena2.setIdUsuario("101");
+        resena2.setCalificacion(4);
+        resena2.setComentario("Buen producto.");
 
         solicitudDTO = new CrearSolicitudResenaDTO();
         solicitudDTO.setIdProducto("1");
@@ -54,24 +63,55 @@ class ResenaControllerTest {
 
     @Test
     void testCrearResena() throws Exception {
-        when(resenaService.agregarResena(any(CrearSolicitudResenaDTO.class))).thenReturn(resena);
+        when(resenaService.agregarResena(any(CrearSolicitudResenaDTO.class))).thenReturn(resena1);
 
         mockMvc.perform(post("/api/resenas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(solicitudDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("id", is(1)))
-                .andExpect(jsonPath("comentario", is("¡Muy bueno!")));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.comentario", is("¡Muy bueno!")));
+    }
+
+    @Test
+    void testCrearResena_Error() throws Exception {
+        when(resenaService.agregarResena(any(CrearSolicitudResenaDTO.class))).thenThrow(new RuntimeException("Error al guardar"));
+
+        mockMvc.perform(post("/api/resenas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(solicitudDTO)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void testObtenerTodasLasResenas() throws Exception {
-        when(resenaService.obtenerTodasLasResenas()).thenReturn(Collections.singletonList(resena));
+        when(resenaService.obtenerTodasLasResenas()).thenReturn(Arrays.asList(resena1, resena2));
 
         mockMvc.perform(get("/api/resenas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("", hasSize(1)))
-                .andExpect(jsonPath("[0].id", is(1)));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].comentario", is("¡Muy bueno!")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].comentario", is("Buen producto.")));
+    }
+
+    @Test
+    void testObtenerResenaPorId_Existente() throws Exception {
+        when(resenaService.obtenerResenaPorId(1L)).thenReturn(Optional.of(resena1));
+
+        mockMvc.perform(get("/api/resenas/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.comentario", is("¡Muy bueno!")));
+    }
+
+    @Test
+    void testObtenerResenaPorId_NoEncontrada() throws Exception {
+        when(resenaService.obtenerResenaPorId(3L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/resenas/3"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -82,5 +122,15 @@ class ResenaControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(resenaService, times(1)).eliminarResena(1L);
+    }
+
+    @Test
+    void testEliminarResena_NoEncontrada() throws Exception {
+        doThrow(new RuntimeException("Reseña no encontrada")).when(resenaService).eliminarResena(3L);
+
+        mockMvc.perform(delete("/api/resenas/3"))
+                .andExpect(status().isNotFound());
+
+        verify(resenaService, times(1)).eliminarResena(3L);
     }
 }
