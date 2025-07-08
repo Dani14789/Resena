@@ -124,4 +124,8 @@ class ResenaServiceTest {
         assertEquals(resena1.getId(), resenaGuardada.getId());
         verify(resenaRepository, times(1)).save(resena1);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> afb39610529be3d210a0817fdb0824ebace69da6
