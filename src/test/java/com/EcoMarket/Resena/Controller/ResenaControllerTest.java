@@ -14,10 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
-<<<<<<< HEAD
 import java.util.List;
-=======
->>>>>>> afb39610529be3d210a0817fdb0824ebace69da6
+
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
@@ -81,7 +79,6 @@ class ResenaControllerTest {
     @Test
     void testCrearResena_Error() throws Exception {
         when(resenaService.agregarResena(any(CrearSolicitudResenaDTO.class))).thenThrow(new RuntimeException("Error al guardar"));
-<<<<<<< HEAD
 
         mockMvc.perform(post("/api/resenas")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,44 +120,10 @@ class ResenaControllerTest {
     void testObtenerResenaPorId_NoEncontrada() throws Exception {
         when(resenaService.obtenerResenaPorId(3L)).thenReturn(Optional.empty());
 
-=======
-
         mockMvc.perform(post("/api/resenas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(solicitudDTO)))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testObtenerTodasLasResenas() throws Exception {
-        when(resenaService.obtenerTodasLasResenas()).thenReturn(Arrays.asList(resena1, resena2));
-
-        mockMvc.perform(get("/api/resenas"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[0].comentario", is("¡Muy bueno!")))
-                .andExpect(jsonPath("$[1].id", is(2)))
-                .andExpect(jsonPath("$[1].comentario", is("Buen producto.")));
-    }
-
-    @Test
-    void testObtenerResenaPorId_Existente() throws Exception {
-        when(resenaService.obtenerResenaPorId(1L)).thenReturn(Optional.of(resena1));
-
-        mockMvc.perform(get("/api/resenas/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.comentario", is("¡Muy bueno!")));
-    }
-
-    @Test
-    void testObtenerResenaPorId_NoEncontrada() throws Exception {
-        when(resenaService.obtenerResenaPorId(3L)).thenReturn(Optional.empty());
-
->>>>>>> afb39610529be3d210a0817fdb0824ebace69da6
-        mockMvc.perform(get("/api/resenas/3"))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -182,8 +145,4 @@ class ResenaControllerTest {
 
         verify(resenaService, times(1)).eliminarResena(3L);
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> afb39610529be3d210a0817fdb0824ebace69da6
