@@ -1,27 +1,23 @@
 package com.EcoMarket.Resena.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist; 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
+import org.springframework.hateoas.RepresentationModel; 
 import java.time.LocalDateTime;
-
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Resena {
+@EqualsAndHashCode(callSuper = false) // Añadir para evitar warnings
+public class Resena extends RepresentationModel<Resena> { // Extender RepresentationModel
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    private Long id; 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
     private String idProducto;
@@ -40,6 +36,6 @@ public class Resena {
 
     @PrePersist
     public void prePersist() {
-        this.fecha = LocalDateTime.now(); 
+        this.fecha = LocalDateTime.now();
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
@@ -21,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(ResenaController.class)
 class ResenaControllerTest {
@@ -85,16 +87,23 @@ class ResenaControllerTest {
 
     @Test
     void testObtenerTodasLasResenas() throws Exception {
-        when(resenaService.obtenerTodasLasResenas()).thenReturn(Arrays.asList(resena1, resena2));
+    // ... Configuración del Mock ...
+    Resena resena1 = new Resena(1L, "1", "100", 5, "¡Muy bueno!", null);
+    Resena resena2 = new Resena(2L, "2", "101", 4, "Buen producto.", null);
+    List<Resena> listaResenas = Arrays.asList(resena1, resena2);
 
-        mockMvc.perform(get("/api/resenas"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[0].comentario", is("¡Muy bueno!")))
-                .andExpect(jsonPath("$[1].id", is(2)))
-                .andExpect(jsonPath("$[1].comentario", is("Buen producto.")));
-    }
+    when(resenaService.obtenerTodasLasResenas()).thenReturn(listaResenas);
+
+    // Ejecución y Aserción
+    mockMvc.perform(get("/api/resenas"))
+            .andExpect(status().isOk())
+            // 1. Verifica que el Content-Type ahora sea APPLICATION_HAL_JSON
+            .andExpect(content().contentType("application/hal+json"))
+            // 2. Verifica que el array anidado 'resenaList' existe
+            .andExpect(jsonPath("$._embedded.resenaList").exists())
+            // 3. Verifica que el array anidado tiene el tamaño esperado
+            .andExpect(jsonPath("$._embedded.resenaList", hasSize(2)));
+}
 
     @Test
     void testObtenerResenaPorId_Existente() throws Exception {
